@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CRM Equipo — Solange Merino</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0f0f0f;--bg2:#181818;--bg3:#222222;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0ede8;--text2:#8a8680;--text3:#555250;--accent:#c8f542;--accent-dim:rgba(200,245,66,0.12);--red:#ff4d4d;--red-dim:rgba(255,77,77,0.1);--blue:#4d9fff;--blue-dim:rgba(77,159,255,0.1);--amber:#ffb347;--amber-dim:rgba(255,179,71,0.1);--green:#4dff91;--green-dim:rgba(77,255,145,0.1);--purple:#b47aff;--r:10px;--rl:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+.sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem;z-index:10;overflow-y:auto}
+.logo-dot{width:28px;height:28px;background:var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;padding:0 .5rem}
+.logo-text{font-size:13px;font-weight:600;line-height:1.2}
+.logo-sub{font-size:10px;color:var(--text3)}
+.filter-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:0 .5rem;margin-bottom:4px}
+.exec-btn{display:block;width:100%;text-align:left;padding:7px 10px;border-radius:var(--r);border:none;background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .15s}
+.exec-btn:hover{background:var(--bg3);color:var(--text)}
+.exec-btn.active{background:var(--accent-dim);color:var(--accent);font-weight:500}
+.main{margin-left:220px;padding:2rem;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.btn-new{background:var(--accent);color:#0f0f0f;border:none;padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+.btn-new:hover{opacity:.85}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem}
+.metric-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.metric-val{font-size:26px;font-weight:600;letter-spacing:-.03em}
+.metric.green .metric-val{color:var(--green)}
+.metric.amber .metric-val{color:var(--amber)}
+.metric.red .metric-val{color:var(--red)}
+.list-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--bg3)}
+.rpill{font-size:11px;padding:3px 9px;border-radius:6px;font-weight:500;white-space:nowrap;display:inline-block}
+.r-pend{background:var(--amber-dim);color:var(--amber)}
+.r-nmv{background:var(--green-dim);color:var(--green)}
+.r-otra{background:var(--blue-dim);color:var(--blue)}
+.r-no{background:var(--red-dim);color:var(--red)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;backdrop-filter:blur(4px)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:1.5rem}
+.fg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:"DM Sans",sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--border2)}
+.fg select option{background:var(--bg3)}
+.fg textarea{min-height:70px;resize:vertical}
+.mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
+.bcnc{background:transparent;border:1px solid var(--border);color:var(--text2);padding:9px 18px;border-radius:var(--r);font-size:13px;cursor:pointer}
+.bcnc:hover{border-color:var(--border2);color:var(--text)}
+.bsave{background:var(--accent);color:#0f0f0f;border:none;padding:9px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+.bsave:hover{opacity:.85}
+.bdel{background:transparent;border:1px solid rgba(255,77,77,.3);color:var(--red);padding:9px 16px;border-radius:var(--r);font-size:13px;cursor:pointer}
+.bdel:hover{background:var(--red-dim)}
+.drow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.drow:last-child{border-bottom:none}
+.dl{color:var(--text3)}.dv{color:var(--text);text-align:right;max-width:60%;word-break:break-word}
+.errbar{background:var(--red-dim);border:1px solid rgba(255,77,77,.25);border-radius:var(--r);padding:10px 14px;color:var(--red);font-size:13px;margin-bottom:1rem}
+.empty{text-align:center;padding:3rem;color:var(--text3)}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-dot"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#0f0f0f" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="#0f0f0f"/></svg></div>
+    <div><div class="logo-text">Equipo Solange</div><div class="logo-sub">Control de leads</div></div>
+  </div>
+  <div>
+    <div class="filter-label" style="margin-bottom:8px">Filtrar ejecutivo</div>
+    <button class="exec-btn active" onclick="setEjec(null)">👁 Todos</button>
+    <div id="exec-list"></div>
+  </div>
+  <div style="margin-top:auto;font-size:11px;color:var(--text3);padding:0 .5rem">Supabase ✓</div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Control de Leads</div>
+      <div class="page-sub" id="filter-sub">Mostrando todos los leads</div>
+    </div>
+    <button class="btn-new" onclick="openForm(null)">+ Asignar lead</button>
+  </div>
+  <div id="errbar" class="errbar" style="display:none"></div>
+  <div class="metrics" style="grid-template-columns:repeat(6,1fr)">
+    <div class="metric"><div class="metric-label">Total asignados</div><div class="metric-val" id="m-total">—</div></div>
+    <div class="metric green"><div class="metric-label">Cerrados NMV</div><div class="metric-val" id="m-nmv">—</div></div>
+    <div class="metric amber"><div class="metric-label">Cerrados otra</div><div class="metric-val" id="m-otra">—</div></div>
+    <div class="metric red"><div class="metric-label">No cerraron</div><div class="metric-val" id="m-no">—</div></div>
+    <div class="metric green"><div class="metric-label">UF Nueva Masvida</div><div class="metric-val" id="m-uf-nmv">—</div></div>
+    <div class="metric amber"><div class="metric-label">UF Otras Isapres</div><div class="metric-val" id="m-uf-otra">—</div></div>
+  </div>
+  <div id="content"><div class="empty">Cargando...</div></div>
+</main>
+
+<!-- Modal form -->
+<div class="overlay" id="form-modal" style="display:none" onclick="if(event.target===this)closeForm()">
+  <div class="modal">
+    <div class="modal-title" id="form-title">Asignar lead</div>
+    <div class="fg-grid">
+      <div class="fg full"><label>Ejecutivo *</label><select id="f-ejec"><option value="">Seleccionar</option></select></div>
+      <div class="fg"><label>Nombre lead *</label><input id="f-nombre" placeholder="Juan Pérez"/></div>
+      <div class="fg"><label>Edad</label><input id="f-edad" type="number" min="0" placeholder="45"/></div>
+      <div class="fg"><label>Teléfono</label><input id="f-tel" placeholder="+56 9 1234 5678"/></div>
+      <div class="fg"><label>Fecha entrega</label><input id="f-fecha" type="date"/></div>
+      <div class="fg"><label>Resultado</label><select id="f-resultado">
+        <option value="Pendiente">Pendiente</option>
+        <option value="Cerrado Nueva Masvida">Cerrado Nueva Masvida</option>
+        <option value="Cerrado Otra Isapre">Cerrado Otra Isapre</option>
+        <option value="No cerró">No cerró</option>
+      </select></div>
+      <div class="fg"><label>Isapre cierre</label><input id="f-isapre" placeholder="Solo si cerró"/></div>
+      <div class="fg"><label>Fecha cierre</label><input id="f-fcierre" type="date"/></div>
+      <div class="fg"><label>UF cerradas</label><input id="f-uf" type="number" step="0.01" placeholder="3.5"/></div>
+      <div class="fg full"><label>Notas</label><textarea id="f-notas" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <div class="mactions">
+      <button class="bdel" id="btn-del" style="display:none" onclick="handleDelete()">Eliminar</button>
+      <button class="bcnc" onclick="closeForm()">Cancelar</button>
+      <button class="bsave" onclick="handleSave()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="overlay" id="detail-modal" style="display:none" onclick="if(event.target===this)closeDetail()">
+  <div class="modal">
+    <div class="modal-title" id="detail-name"></div>
+    <div id="detail-body"></div>
+    <div class="mactions">
+      <button class="bdel" onclick="handleDeleteDetail()">Eliminar</button>
+      <button class="bcnc" onclick="closeDetail()">Cerrar</button>
+      <button class="bsave" onclick="handleEditDetail()">Editar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB="https://ddqjllwdbhrxnzbcqfug.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkcWpsbHdkYmhyeG56YmNxZnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMTEyNjAsImV4cCI6MjA5MzY4NzI2MH0.LeSH3cutXM7k1wcJhrAM0QJocj6a6XbIYYakrdkiQlM";
+const H={"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY,"Prefer":"return=minimal"};
+
+const EJECUTIVOS=["Cristina Balcazar","Daniela Quinteros","Scarlet Kremer","Camila Gonzalez","Luz Marina Perez","Andres Benitez","Valeria Oyarzo","Constanza Angulo","Juan Claudio Bustos","Camila Castro","Rocio Urrutia"];
+
+let leads=[],filtroEjec=null,editingId=null,detailId=null;
+
+async function req(method,path,body){
+  const opts={method,headers:H};
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(SB+"/rest/v1/"+path,opts);
+  if(!r.ok){const t=await r.text();throw new Error(t);}
+  if(method==="GET"){const t=await r.text();return t?JSON.parse(t):[];}
+  return null;
+}
+
+function showErr(msg){const b=document.getElementById("errbar");b.textContent=msg;b.style.display="block";setTimeout(()=>b.style.display="none",6000);}
+
+async function load(){
+  try{leads=await req("GET","leads_equipo?select=*&order=created_at.desc")||[];}
+  catch(e){showErr("Error al cargar: "+e.message);leads=[];}
+  renderExecList();
+  updateMetrics();
+  renderTable();
+}
+
+function renderExecList(){
+  const el=document.getElementById("exec-list");
+  el.innerHTML=EJECUTIVOS.map(e=>`<button class="exec-btn${filtroEjec===e?" active":""}" onclick="setEjec('${e}')">${e}</button>`).join("");
+}
+
+function setEjec(e){
+  filtroEjec=e;
+  document.querySelectorAll(".exec-btn").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+  document.getElementById("filter-sub").textContent=e?"Mostrando leads de: "+e:"Mostrando todos los leads";
+  updateMetrics();
+  renderTable();
+}
+
+function filteredLeads(){return filtroEjec?leads.filter(l=>l.ejecutivo===filtroEjec):leads;}
+
+function updateMetrics(){
+  const fl=filteredLeads();
+  document.getElementById("m-total").textContent=fl.length;
+  document.getElementById("m-nmv").textContent=fl.filter(l=>l.resultado==="Cerrado Nueva Masvida").length;
+  document.getElementById("m-otra").textContent=fl.filter(l=>l.resultado==="Cerrado Otra Isapre").length;
+  document.getElementById("m-no").textContent=fl.filter(l=>l.resultado==="No cerró").length;
+}
+
+function rClass(r){
+  if(r==="Pendiente")return "r-pend";
+  if(r==="Cerrado Nueva Masvida")return "r-nmv";
+  if(r==="Cerrado Otra Isapre")return "r-otra";
+  if(r==="No cerró")return "r-no";
+  return "";
+}
+
+function renderTable(){
+  const fl=filteredLeads();
+  const el=document.getElementById("content");
+  if(!fl.length){el.innerHTML='<div class="empty">Sin leads aún.</div>';return;}
+  el.innerHTML='<div class="list-wrap"><table><thead><tr><th>Ejecutivo</th><th>Lead</th><th>Edad</th><th>Teléfono</th><th>Entrega</th><th>Resultado</th><th>Cierre</th></tr></thead><tbody>'+
+    fl.map(l=>`<tr onclick="openDetail('${l.id}')">
+      <td style="font-weight:500">${l.ejecutivo}</td>
+      <td>${l.nombre_lead}</td>
+      <td>${l.edad||"—"}</td>
+      <td>${l.telefono||"—"}</td>
+      <td>${l.fecha_entrega||"—"}</td>
+      <td><span class="rpill ${rClass(l.resultado)}">${l.resultado}</span></td>
+      <td>${l.fecha_cierre||"—"}</td>
+    </tr>`).join("")+
+    '</tbody></table></div>';
+}
+
+// Poblar select ejecutivos
+function initSelectEjec(){
+  const s=document.getElementById("f-ejec");
+  EJECUTIVOS.forEach(e=>{const o=document.createElement("option");o.value=e;o.textContent=e;s.appendChild(o);});
+}
+
+function openForm(id){
+  editingId=id||null;
+  const l=id?leads.find(x=>x.id===id):null;
+  document.getElementById("form-title").textContent=l?"Editar lead":"Asignar lead";
+  document.getElementById("btn-del").style.display=l?"block":"none";
+  const g=x=>document.getElementById(x);
+  g("f-ejec").value=l?l.ejecutivo||"":"";
+  g("f-nombre").value=l?l.nombre_lead||"":"";
+  g("f-edad").value=l?l.edad||"":"";
+  g("f-tel").value=l?l.telefono||"":"";
+  g("f-fecha").value=l?l.fecha_entrega||"":"";
+  g("f-resultado").value=l?l.resultado||"Pendiente":"Pendiente";
+  g("f-isapre").value=l?l.isapre_cierre||"":"";
+  g("f-fcierre").value=l?l.fecha_cierre||"":"";
+  g("f-uf").value=l?l.uf_cerradas||"":"";
+  g("f-notas").value=l?l.notas||"":"";
+  document.getElementById("form-modal").style.display="flex";
+}
+function closeForm(){document.getElementById("form-modal").style.display="none";editingId=null;}
+
+function collectForm(){
+  const g=x=>document.getElementById(x);
+  return{
+    ejecutivo:g("f-ejec").value,
+    nombre_lead:g("f-nombre").value.trim(),
+    edad:parseInt(g("f-edad").value)||null,
+    telefono:g("f-tel").value.trim()||null,
+    fecha_entrega:g("f-fecha").value||null,
+    resultado:g("f-resultado").value||"Pendiente",
+    isapre_cierre:g("f-isapre").value.trim()||null,
+    fecha_cierre:g("f-fcierre").value||null,
+    uf_cerradas:parseFloat(g("f-uf").value)||null,
+    notas:g("f-notas").value.trim()||null
+  };
+}
+
+async function handleSave(){
+  const data=collectForm();
+  if(!data.ejecutivo){alert("Selecciona un ejecutivo");return;}
+  if(!data.nombre_lead){alert("El nombre del lead es obligatorio");return;}
+  try{
+    if(editingId)await req("PATCH","leads_equipo?id=eq."+editingId,data);
+    else await req("POST","leads_equipo",data);
+    closeForm();await load();
+  }catch(e){showErr("Error al guardar: "+e.message);}
+}
+
+async function handleDelete(){
+  if(!confirm("\u00bfEliminar este lead?"))return;
+  try{await req("DELETE","leads_equipo?id=eq."+editingId);closeForm();await load();}
+  catch(e){showErr("Error al eliminar");}
+}
+
+function openDetail(id){
+  detailId=id;
+  const l=leads.find(x=>x.id===id);
+  document.getElementById("detail-name").textContent=l.nombre_lead;
+  document.getElementById("detail-body").innerHTML=[
+    ["Ejecutivo",l.ejecutivo],
+    ["Edad",l.edad||"—"],
+    ["Tel\u00e9fono",l.telefono||"—"],
+    ["Fecha entrega",l.fecha_entrega||"—"],
+    ["Resultado",`<span class="rpill ${rClass(l.resultado)}">${l.resultado}</span>`],
+    ["Isapre cierre",l.isapre_cierre||"—"],
+    ["Fecha cierre",l.fecha_cierre||"—"],
+    ["UF cerradas",l.uf_cerradas?l.uf_cerradas+" UF":"—"],
+    ["Notas",l.notas||"—"]
+  ].map(([k,v])=>`<div class="drow"><span class="dl">${k}</span><span class="dv">${v}</span></div>`).join("");
+  document.getElementById("detail-modal").style.display="flex";
+}
+function closeDetail(){document.getElementById("detail-modal").style.display="none";detailId=null;}
+function handleEditDetail(){const id=detailId;closeDetail();openForm(id);}
+async function handleDeleteDetail(){
+  if(!confirm("\u00bfEliminar?"))return;
+  try{await req("DELETE","leads_equipo?id=eq."+detailId);closeDetail();await load();}
+  catch(e){showErr("Error al eliminar");}
+}
+
+initSelectEjec();
+load();
+</script>
+</body>
+</html>
