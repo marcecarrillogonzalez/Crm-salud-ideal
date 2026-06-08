@@ -24,7 +24,7 @@ nav{display:flex;flex-direction:column;gap:3px}
 .page-title{font-size:22px;font-weight:600;letter-spacing:-.02em}
 .btn-new{background:var(--accent);color:#0f0f0f;border:none;padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
 .btn-new:hover{opacity:.85}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:2rem}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem}
 .metric-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 .metric-val{font-size:28px;font-weight:600;letter-spacing:-.03em}
@@ -119,6 +119,8 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="metric accent"><div class="metric-label">Cerrados</div><div class="metric-val" id="m-cerrados">—</div></div>
     <div class="metric"><div class="metric-label">Conversión</div><div class="metric-val" id="m-conv">—</div></div>
     <div class="metric"><div class="metric-label">UF cerrada (mes)</div><div class="metric-val" id="m-uf">—</div></div>
+    <div class="metric"><div class="metric-label">Hombres solos</div><div class="metric-val" id="m-hsolo">—</div></div>
+    <div class="metric"><div class="metric-label">Beneficios vendidos</div><div class="metric-val" id="m-benef">—</div></div>
   </div>
   <div class="tabs">
     <button class="tab-btn active" id="tab-pipeline" onclick="setView('pipeline')">Pipeline</button>
@@ -139,12 +141,15 @@ tbody tr:hover td{background:var(--bg3)}
       <div class="fg"><label>Plan actual</label><input id="f-plan-actual" placeholder="GES + Libre Elección"/></div>
       <div class="fg"><label>Precio actual (UF)</label><input id="f-precio-uf" type="number" step="0.01" placeholder="3.5"/></div>
       <div class="fg"><label>Cargas</label><input id="f-cargas" type="number" min="0" value="0"/></div>
+      <div class="fg"><label>Sexo</label><select id="f-sexo"><option value="">—</option><option>Hombre</option><option>Mujer</option></select></div>
       <div class="fg"><label>Etapa</label><select id="f-etapa"><option>Nuevo lead</option><option>Contactado</option><option>Reunión agendada</option><option>Propuesta enviada</option><option>Cerrado</option><option>Perdido</option></select></div>
       <div class="fg"><label>Próximo seguimiento</label><input id="f-seg" type="date"/></div>
       <div class="fg"><label>Plan tomado</label><input id="f-plan-tomado" placeholder="Solo si cerró"/></div>
       <div class="fg"><label>Clínica preferente</label><input id="f-clinica" placeholder="Clínica Alemana, UC, etc."/></div>
       <div class="fg"><label>Presupuesto (UF)</label><input id="f-presupuesto" type="number" step="0.01" placeholder="5.0"/></div>
       <div class="fg"><label>Valor plan (UF)</label><input id="f-valor-plan" type="number" step="0.01"/></div>
+      <div class="fg"><label>Beneficios adicionales (n°)</label><input id="f-benef" type="number" min="0" value="0"/></div>
+      <div class="fg"><label>¿Cuáles beneficios?</label><input id="f-benef-det" placeholder="Dental, vida, oncológico..."/></div>
       <div class="fg full"><label>Notas</label><textarea id="f-notas" placeholder="Historial, observaciones..."></textarea></div>
     </div>
     <div class="mactions">
@@ -222,13 +227,18 @@ async function load(){
 
 function updateMetrics(){
   const ml=monthLeads();
-  const total=ml.length,cerrados=ml.filter(l=>l.etapa==="Cerrado").length;
+  const cerr=ml.filter(l=>l.etapa==="Cerrado");
+  const total=ml.length,cerrados=cerr.length;
   const conv=total?Math.round(cerrados/total*100):0;
-  const uf=ml.filter(l=>l.etapa==="Cerrado"&&l.valor_plan_uf).reduce((a,b)=>a+(b.valor_plan_uf||0),0);
+  const uf=cerr.reduce((a,b)=>a+(b.valor_plan_uf||0),0);
+  const hsolo=cerr.filter(l=>l.sexo==="Hombre"&&(l.cargas||0)===0).length;
+  const benef=cerr.reduce((a,b)=>a+(b.beneficios_adicionales||0),0);
   document.getElementById("m-total").textContent=total;
   document.getElementById("m-cerrados").textContent=cerrados;
   document.getElementById("m-conv").textContent=conv+"%";
   document.getElementById("m-uf").textContent=uf.toFixed(1)+" UF";
+  document.getElementById("m-hsolo").textContent=hsolo;
+  document.getElementById("m-benef").textContent=benef;
 }
 
 function setView(v){
@@ -296,10 +306,13 @@ function openForm(id){
   g("f-plan-actual").value=l?l.plan_actual||"":"";
   g("f-precio-uf").value=l?l.precio_actual_uf||"":"";
   g("f-cargas").value=l?l.cargas||0:0;
+  g("f-sexo").value=l?l.sexo||"":"";
   g("f-etapa").value=l?l.etapa||"Nuevo lead":"Nuevo lead";
   g("f-seg").value=l?l.fecha_proximo_seguimiento||"":"";
   g("f-plan-tomado").value=l?l.plan_tomado||"":"";
   g("f-valor-plan").value=l?l.valor_plan_uf||"":"";
+  g("f-benef").value=l?l.beneficios_adicionales||0:0;
+  g("f-benef-det").value=l?l.detalle_beneficios||"":"";
   g("f-clinica").value=l?l.clinica_preferente||"":"";
   g("f-presupuesto").value=l?l.presupuesto_uf||"":"";
   g("f-notas").value=l?l.notas||"":"";
@@ -322,6 +335,9 @@ function collectForm(){
     fecha_proximo_seguimiento:g("f-seg").value||null,
     plan_tomado:g("f-plan-tomado").value.trim()||null,
     valor_plan_uf:parseFloat(g("f-valor-plan").value)||null,
+    sexo:g("f-sexo").value||null,
+    beneficios_adicionales:parseInt(g("f-benef").value)||0,
+    detalle_beneficios:g("f-benef-det").value.trim()||null,
     clinica_preferente:g("f-clinica").value.trim()||null,
     presupuesto_uf:parseFloat(g("f-presupuesto").value)||null,
     notas:g("f-notas").value.trim()||null
@@ -353,7 +369,8 @@ function openDetail(id){
     ["Tel\u00e9fono",l.telefono||"—"],["Email",l.email||"—"],["Fuente",l.fuente||"—"],
     ["Isapre actual",l.isapre_actual||"—"],["Plan actual",l.plan_actual||"—"],
     ["Precio actual",l.precio_actual_uf?l.precio_actual_uf+" UF":"—"],
-    ["Cargas",l.cargas||0],["Plan tomado",l.plan_tomado||"—"],
+    ["Cargas",l.cargas||0],["Sexo",l.sexo||"—"],["Plan tomado",l.plan_tomado||"—"],
+    ["Beneficios adicionales",(l.beneficios_adicionales||0)+(l.detalle_beneficios?" ("+l.detalle_beneficios+")":"")],
     ["Valor plan",l.valor_plan_uf?l.valor_plan_uf+" UF":"—"],
     ["Pr\u00f3ximo seguimiento",l.fecha_proximo_seguimiento||"—"],
     ["Cl\u00ednica preferente",l.clinica_preferente||"—"],
