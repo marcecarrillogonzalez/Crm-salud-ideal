@@ -113,6 +113,9 @@ tbody tr:hover td{background:var(--bg3)}
       <div class="fg"><label>Nombre lead *</label><input id="f-nombre" placeholder="Juan Pérez"/></div>
       <div class="fg"><label>Edad</label><input id="f-edad" type="number" min="0" placeholder="45"/></div>
       <div class="fg"><label>Teléfono</label><input id="f-tel" placeholder="+56 9 1234 5678"/></div>
+      <div class="fg"><label>Email</label><input id="f-email" type="email" placeholder="correo@ejemplo.com"/></div>
+      <div class="fg"><label>N° de cargas</label><input id="f-cargas" type="number" min="0" placeholder="2"/></div>
+      <div class="fg"><label>Clínica preferente</label><input id="f-clinica" placeholder="Ej: Clínica Alemana"/></div>
       <div class="fg"><label>Fecha entrega</label><input id="f-fecha" type="date"/></div>
       <div class="fg"><label>Resultado</label><select id="f-resultado">
         <option value="Pendiente">Pendiente</option>
@@ -151,7 +154,7 @@ const SB="https://ddqjllwdbhrxnzbcqfug.supabase.co";
 const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkcWpsbHdkYmhyeG56YmNxZnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMTEyNjAsImV4cCI6MjA5MzY4NzI2MH0.LeSH3cutXM7k1wcJhrAM0QJocj6a6XbIYYakrdkiQlM";
 const H={"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+KEY,"Prefer":"return=minimal"};
 
-const EJECUTIVOS=["Cristina Balcazar","Daniela Quinteros","Scarlet Kremer","Camila Gonzalez","Luz Marina Perez","Andres Benitez","Valeria Oyarzo","Constanza Angulo","Juan Claudio Bustos","Camila Castro","Rocio Urrutia"];
+const EJECUTIVOS=["Cristina Balcazar","Daniela Quinteros","Scarlet Kremer","Camila Gonzalez","Luz Marina Perez","Andres Benitez","Valeria Oyarzo","Constanza Angulo","Juan Claudio Bustos","Camila Castro","Rocio Urrutia","Daniela Cabrera"];
 
 let leads=[],filtroEjec=null,editingId=null,detailId=null;
 
@@ -239,6 +242,9 @@ function openForm(id){
   g("f-nombre").value=l?l.nombre_lead||"":"";
   g("f-edad").value=l?l.edad||"":"";
   g("f-tel").value=l?l.telefono||"":"";
+  g("f-email").value=l?l.email||"":"";
+  g("f-cargas").value=l?l.numero_cargas||"":"";
+  g("f-clinica").value=l?l.clinica_preferente||"":"";
   g("f-fecha").value=l?l.fecha_entrega||"":"";
   g("f-resultado").value=l?l.resultado||"Pendiente":"Pendiente";
   g("f-isapre").value=l?l.isapre_cierre||"":"";
@@ -256,6 +262,9 @@ function collectForm(){
     nombre_lead:g("f-nombre").value.trim(),
     edad:parseInt(g("f-edad").value)||null,
     telefono:g("f-tel").value.trim()||null,
+    email:g("f-email").value.trim()||null,
+    numero_cargas:parseInt(g("f-cargas").value)||null,
+    clinica_preferente:g("f-clinica").value.trim()||null,
     fecha_entrega:g("f-fecha").value||null,
     resultado:g("f-resultado").value||"Pendiente",
     isapre_cierre:g("f-isapre").value.trim()||null,
@@ -290,6 +299,9 @@ function openDetail(id){
     ["Ejecutivo",l.ejecutivo],
     ["Edad",l.edad||"—"],
     ["Tel\u00e9fono",l.telefono||"—"],
+    ["Email",l.email||"—"],
+    ["N\u00b0 de cargas",l.numero_cargas!=null?l.numero_cargas:"—"],
+    ["Cl\u00ednica preferente",l.clinica_preferente||"—"],
     ["Fecha entrega",l.fecha_entrega||"—"],
     ["Resultado",`<span class="rpill ${rClass(l.resultado)}">${l.resultado}</span>`],
     ["Isapre cierre",l.isapre_cierre||"—"],
